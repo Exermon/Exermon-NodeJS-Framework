@@ -6,15 +6,11 @@
   "scripts": {
     "compile": "tsc",
     "node": "tsc & node ./dist/index.js",
-
     "compile-scripts": "tsc -p script-tsconfig.json",
-
     "sync-sequelize": "npm run compile-scripts & node ./dist/scripts/src/scripts/SyncSequelize.js",
-
     "build-test": "./scripts/build-test.sh",
     "run-test": "./scripts/build-test.sh & ./scripts/run-test.sh",
     "deploy-test": "./scripts/build-test.sh & ./scripts/deploy-test.sh",
-
     "build-prod": "./scripts/build-prod.sh",
     "run-prod": "./scripts/build-prod.sh & ./scripts/run-prod.sh",
     "deploy-prod": "./scripts/build-prod.sh & ./scripts/deploy-prod.sh"
@@ -72,6 +68,7 @@
     "sequelize": "^6.21.2",
     "sequelize-typescript": "^2.1.3",
     "snowflake-id": "^1.1.0",
+    "tencentcloud-sdk-nodejs": "^4.0.715",
     "ts-node": "^10.9.1"
   }
 }
