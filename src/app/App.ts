@@ -8,6 +8,7 @@ import {getFiles} from "../utils/FileUtils";
 import 'reflect-metadata'
 import {ServerConfig} from "../config/ConfigManager";
 import {managerContext} from "./ManagerContext";
+import {sequelizeMgr} from "../modules/sequelize/SequelizeManager";
 
 export function app() {
 	return getSingleton(App);

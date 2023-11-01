@@ -7,7 +7,7 @@ import {smsMgr} from "./SMSManager";
 import {MathUtils} from "../../utils/MathUtils";
 
 
-@route("/api/user")
+@route("/user")
 export class UserInterface extends BaseInterface {
 
     @post("/login")
@@ -50,7 +50,6 @@ export class UserInterface extends BaseInterface {
         @body("phone") phone: string,
         @body("codeType", true) codeType?: string) {
         if (!this.validPhone(phone)) throw "参数不合法";
-
         const code = MathUtils.randomString(4, "0123456789");
         await smsMgr().sendCode(code, phone);
     }

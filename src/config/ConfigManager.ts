@@ -8,7 +8,7 @@ dotenv.config();
 
 export type EnvType = "prod" | "dev" | "test" | "default" | string;
 
-const ConfigPath = process.env["CONFIG_PATH"] || ".";
+const ConfigPath = process.env["CONFIG_PATH"] || "..";
 const DefaultConfigClearCron = "0 * * * * *";
 
 export function config() { return configMgr().config; }

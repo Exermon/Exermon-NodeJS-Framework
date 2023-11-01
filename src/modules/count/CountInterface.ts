@@ -1,6 +1,6 @@
 import {BaseInterface, get, route} from "../http/InterfaceManager";
 
-@route("/api/count")
+@route("/count")
 export class UserInterface extends BaseInterface {
     @get("/")
     async getCountData() {

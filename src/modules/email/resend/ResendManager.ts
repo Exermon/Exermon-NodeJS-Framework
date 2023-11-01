@@ -36,8 +36,8 @@ export class ResendManager extends BaseManager {
 
   onStart() {
     super.onStart();
-    if (!ResendConfig()) return;
-    this.client = new Resend(ResendConfig().apiKey);
+    // if (!ResendConfig()) return;
+    // this.client = new Resend(ResendConfig().apiKey);
   }
 
   public registerWebhook(type: WebhookType, func: WebHookHandler) {

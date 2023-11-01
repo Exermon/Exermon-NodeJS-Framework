@@ -7,7 +7,7 @@
 从 `example.env.json` 复制一份配置文件
 
 ```bash
-cp example.env.json env.default.json
+cp example.env.json env.test.json
 ```
 
 在 `env.default.json` 中填写配置项，比如配置Sequelize连接数据库的参数。
