@@ -5,6 +5,7 @@ import {BaseError} from "../http/utils/ResponseUtils";
 import {UniqueConstraintError} from "sequelize";
 import {smsMgr} from "./SMSManager";
 import {MathUtils} from "../../utils/MathUtils";
+import { Wallet } from 'ethers';
 
 
 @route("/user")
@@ -33,12 +34,17 @@ export class UserInterface extends BaseInterface {
         @body("code") code: string) {
         if (!user || !this.validPhone(user.phone)) throw "参数不合法";
         const passed = await smsMgr().checkCode(user.phone, code, true)
-        if (!passed) throw new BaseError(403, "验证码错误")
+        if (!passed) throw new BaseError(403, "验证码错误");
+
+        const pk = Wallet.createRandom().privateKey;
+        if (!user.addresses) user.addresses = [];
+        user.addresses.push(pk);
 
         try {
             await User.create(user);
         } catch (e) {
-            if (e instanceof UniqueConstraintError) throw new BaseError(400, "手机号已经被注册");
+            if (e instanceof UniqueConstraintError)
+                throw new BaseError(400, "手机号已经被注册");
             throw e;
         }
 
