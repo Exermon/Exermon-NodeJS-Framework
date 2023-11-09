@@ -56,8 +56,8 @@ export class RedisManager extends BaseManager {
 
   public async onStart() {
     super.onStart();
-    // await this.connect();
-    // this.setupCacheHandler();
+    await this.connect();
+    this.setupCacheHandler();
   }
   public async connect() {
     if (!RedisConfig()) return;
