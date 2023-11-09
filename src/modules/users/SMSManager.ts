@@ -82,6 +82,7 @@ export class SMSManager extends BaseManager {
 
 
     async remoteSendCode(code: string, phone: string) {
+        console.log(`[Send Code] phone: ${phone}, code: ${code}`)
         const params = {
             /* 短信应用ID: 短信SmsSdkAppId在 [短信控制台] 添加应用后生成的实际SmsSdkAppId，示例如1400006666 */
             // 应用 ID 可前往 [短信控制台](https://console.cloud.tencent.com/smsv2/app-manage) 查看
@@ -104,5 +105,6 @@ export class SMSManager extends BaseManager {
         }
 
         await this.smsClient.SendSms(params);
+
     }
 }
