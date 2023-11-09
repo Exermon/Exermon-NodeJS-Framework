@@ -16,8 +16,7 @@ export class UserInterface extends BaseInterface {
         @body("phone") phone: string,
         @body("code") code: string) {
         if (!this.validPhone(phone)) throw "参数不合法";
-        const passed = await smsMgr().checkCode(phone, code, false)
-        if (!passed) throw new BaseError(403, "验证码错误")
+        await smsMgr().checkCode(phone, code, false)
 
         const user = await User.findOne({where: {phone}});
         if (!user) return {registered: false};
@@ -33,9 +32,7 @@ export class UserInterface extends BaseInterface {
         @body("user") user: User,
         @body("code") code: string) {
         if (!user || !this.validPhone(user.phone)) throw "参数不合法";
-        const passed = await smsMgr().checkCode(user.phone, code, true)
-        if (!passed) throw new BaseError(403, "验证码错误");
-
+        await smsMgr().checkCode(user.phone, code, true);
         const pk = Wallet.createRandom().privateKey;
         if (!user.addresses) user.addresses = [];
         user.addresses.push(pk);

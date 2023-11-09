@@ -1,6 +1,7 @@
 import {BaseManager, getManager, manager} from "../../app/ManagerContext";
 import {Client} from "tencentcloud-sdk-nodejs/tencentcloud/services/sms/v20210111/sms_client";
 import {redisMgr} from "../redis/RedisManager";
+import {BaseError} from "../http/utils/ResponseUtils";
 
 
 class CodeMessage {
@@ -70,13 +71,12 @@ export class SMSManager extends BaseManager {
     async checkCode(phone: string, code: string,
                     clearAfterSuccess: boolean = false) {
         if (code === this.magic) {
-            return true
+            return;
         }
         const codeMessage = await redisMgr().getKVData<CodeMessage>(this.codeKey(phone))
-        if (!codeMessage) return false;
-        if (codeMessage.code !== code) return false;
+        if (!codeMessage) throw new BaseError(403, "验证码未发送或已过期，请重新发送");
+        if (codeMessage.code !== code) throw new BaseError(403, "验证码错误");
         if (clearAfterSuccess) await redisMgr().deleteKV(this.codeKey(phone))
-        return true;
     }
 
 
