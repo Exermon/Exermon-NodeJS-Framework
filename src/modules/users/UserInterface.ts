@@ -29,25 +29,22 @@ export class UserInterface extends BaseInterface {
         let registered = true;
         if (!user) { //注册
             registered = false;
-            user = new User();
-            user.phone = phone;
-            await this.register(user);
+            await this.register(phone);
         }
 
         return {
-            jwt: authMgr().createKey({phone: user.phone}),
+            jwt: await authMgr().createKey({phone: phone}),
             user, registered
         };
     }
 
-    async register(user: User) {
-        console.log("[Register] user: ", user)
+    async register(phone: string) {
         const pk = Wallet.createRandom().privateKey;
-        user.addresses.push(pk);
-
         try {
-            console.log("[SQL CREATE] user: ", user)
-            await User.create(user);
+            await User.create({
+                phone,
+                addresses: [pk]
+            });
         } catch (e) {
             if (e instanceof UniqueConstraintError)
                 throw new BaseError(400, "手机号已经被注册");

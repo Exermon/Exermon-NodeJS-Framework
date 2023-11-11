@@ -21,7 +21,6 @@ export class User extends BaseModel {
     @Column(DataType.BIGINT)
     id!: string;
 
-    @AllowNull(false)
     @Unique
     @Column(DataType.STRING(255))
     phone: string;
@@ -43,6 +42,5 @@ export class User extends BaseModel {
     level?: UserLevel;
 
     @JSONColumn
-    addresses?: string[] = [];
-
+    addresses?: string[];
 }
