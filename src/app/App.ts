@@ -8,6 +8,7 @@ import {getFiles} from "../utils/FileUtils";
 import 'reflect-metadata'
 import {ServerConfig} from "../config/ConfigManager";
 import {managerContext} from "./ManagerContext";
+import {setupConf} from "../config/ConfigLoader";
 
 export function app() {
 	return getSingleton(App);
@@ -33,6 +34,7 @@ export class App {
 	 * 启动
 	 */
 	public async start() {
+		await setupConf();
 		await managerContext().start();
 	}
 	public async ready() {

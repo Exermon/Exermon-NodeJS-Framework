@@ -1,3 +1,6 @@
+
+export type EnvType = "prod" | "dev" | "test" | "default" | string;
+
 // 服务器设置
 export type ServerConfig = {
   updateInterval: number
