@@ -6,7 +6,7 @@ import {APP_META} from "../../config/ConfigLoader";
 
 
 export interface Payload extends JwtPayload {
-    // TODO
+    phone: string
 }
 
 const JWTExpireTime = 60 * 60 * 24 * 3;

@@ -10,8 +10,8 @@ export let GlobalEnv: EnvType = process.env["NODE_ENV"] as EnvType || "default";
 export let LocalConfigPath = process.env["CONFIG_PATH"] || ".";
 
 export const APP_META = {
-    "projectName": "example",
-    "nacosServer": "127.0.0.1:8848"
+    "projectName": "dou-server",
+    "nacosServer": "8.138.58.80:8848"
 }
 
 export async function setupConf() {

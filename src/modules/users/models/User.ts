@@ -40,9 +40,9 @@ export class User extends BaseModel {
     region?: string;
 
     @Column(DataType.SMALLINT)
-    level: UserLevel;
+    level?: UserLevel;
 
     @JSONColumn
-    addresses: string[];
+    addresses?: string[];
 
 }

@@ -1,15 +1,22 @@
-import {BaseInterface, body, post, route} from "../http/InterfaceManager";
+import {BaseInterface, body, get, post, route} from "../http/InterfaceManager";
 import {User} from "./models/User";
-import {userMgr} from "./UserManager";
 import {BaseError} from "../http/utils/ResponseUtils";
 import {UniqueConstraintError} from "sequelize";
 import {smsMgr} from "./SMSManager";
 import {MathUtils} from "../../utils/MathUtils";
 import { Wallet } from 'ethers';
+import {auth, authMgr, Payload} from "../auth/AuthManager";
 
 
 @route("/user")
 export class UserInterface extends BaseInterface {
+    @auth()
+    @get("/me")
+    async getMyProfile(payload: Payload) {
+        return {
+            user: await User.findOne({where: {phone: payload.phone}})
+        }
+    }
 
     @post("/login")
     async login(
@@ -18,21 +25,22 @@ export class UserInterface extends BaseInterface {
         if (!this.validPhone(phone)) throw "参数不合法";
         await smsMgr().checkCode(phone, code, false)
 
-        const user = await User.findOne({where: {phone}});
-        if (!user) return {registered: false};
+        let user = await User.findOne({where: {phone}});
+        let registered = true;
+        if (!user) { //注册
+            registered = false;
+            user = new User();
+            user.phone = phone;
+            await this.register(user);
+        }
 
         return {
-            jwt: userMgr().createKey(user.phone), user,
-            registered: true
+            jwt: authMgr().createKey({phone: user.phone}),
+            user, registered
         };
     }
 
-    @post("/register")
-    async register(
-        @body("user") user: User,
-        @body("code") code: string) {
-        if (!user || !this.validPhone(user.phone)) throw "参数不合法";
-        await smsMgr().checkCode(user.phone, code, true);
+    async register(user: User) {
         const pk = Wallet.createRandom().privateKey;
         if (!user.addresses) user.addresses = [];
         user.addresses.push(pk);
@@ -44,8 +52,6 @@ export class UserInterface extends BaseInterface {
                 throw new BaseError(400, "手机号已经被注册");
             throw e;
         }
-
-        return {jwt: userMgr().createKey(user.phone)};
     }
 
     @post("/sendCode")
