@@ -9,7 +9,7 @@ export let GlobalConfig: MainConfig = DefaultConfig;
 export let GlobalEnv: EnvType = process.env["NODE_ENV"] as EnvType || "default";
 export let LocalConfigPath = process.env["CONFIG_PATH"] || ".";
 
-const APP_META = {
+export const APP_META = {
     "projectName": "example",
     "nacosServer": "127.0.0.1:8848"
 }
