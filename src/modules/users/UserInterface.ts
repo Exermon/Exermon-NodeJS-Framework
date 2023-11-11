@@ -23,7 +23,7 @@ export class UserInterface extends BaseInterface {
         @body("phone") phone: string,
         @body("code") code: string) {
         if (!this.validPhone(phone)) throw "参数不合法";
-        await smsMgr().checkCode(phone, code, false)
+        await smsMgr().checkCode(phone, code, false);
 
         let user = await User.findOne({where: {phone}});
         let registered = true;
@@ -41,11 +41,12 @@ export class UserInterface extends BaseInterface {
     }
 
     async register(user: User) {
+        console.log("[Register] user: ", user)
         const pk = Wallet.createRandom().privateKey;
-        if (!user.addresses) user.addresses = [];
         user.addresses.push(pk);
 
         try {
+            console.log("[SQL CREATE] user: ", user)
             await User.create(user);
         } catch (e) {
             if (e instanceof UniqueConstraintError)

@@ -43,6 +43,6 @@ export class User extends BaseModel {
     level?: UserLevel;
 
     @JSONColumn
-    addresses?: string[];
+    addresses?: string[] = [];
 
 }
