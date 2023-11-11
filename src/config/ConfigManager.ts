@@ -26,16 +26,6 @@ export function configMgr() {
 
 @manager
 export class ConfigManager extends BaseManager {
-  constructor() {
-    super();
-    this.init();
-  }
-
-  async init() {
-    const confLoader = new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName);
-    this.configCache = await  confLoader.load(this.env);
-  }
-
   private updateHandler: () => Promise<MainConfig>
   private loadedHandler: (c: MainConfig) => Promise<void>
 
@@ -46,7 +36,15 @@ export class ConfigManager extends BaseManager {
   public configCache: MainConfig;
 
   public get config(): MainConfig {
-    return this.configCache;
+      if(this.configCache) {
+        return this.configCache;
+      }
+      const confLoader = new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName);
+      confLoader.load(this.env).then((res) => {
+        this.configCache = res;
+      });
+      while (!this.configCache) {}
+      return this.configCache;
   }
 
   // public registerHandlers(
