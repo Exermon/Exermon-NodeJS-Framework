@@ -16,6 +16,7 @@ const APP_META = {
 
 export async function setupConf() {
     GlobalConfig = await new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName).load(GlobalEnv);
+    console.log("[Load Config]", GlobalConfig)
 }
 
 
