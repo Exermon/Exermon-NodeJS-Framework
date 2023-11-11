@@ -34,14 +34,17 @@ export class ConfigManager extends BaseManager {
     return process.env["NODE_ENV"] as EnvType || "default";
   }
 
-  public config: MainConfig;
+  public configCache: MainConfig;
 
-
-  async onStart() {
-    super.onStart();
-
+  public get config(): MainConfig {
+    if(this.configCache) {
+      return this.configCache;
+    }
     const confLoader = new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName);
-    this.config = await confLoader.load(this.env);
+    confLoader.load(this.env).then((res) => {
+      this.configCache = res;
+    });
+    return this.configCache;
   }
 
   // public registerHandlers(
