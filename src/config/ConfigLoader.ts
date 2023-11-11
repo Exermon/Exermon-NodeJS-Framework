@@ -1,6 +1,23 @@
-import {DefaultConfig, MainConfig} from "./ConfigType";
+import {DefaultConfig, EnvType, MainConfig} from "./ConfigType";
 import {NacosConfigClient} from "nacos";
 import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+export let GlobalConfig: MainConfig = DefaultConfig;
+export let GlobalEnv: EnvType = process.env["NODE_ENV"] as EnvType || "default";
+export let LocalConfigPath = process.env["CONFIG_PATH"] || ".";
+
+const APP_META = {
+    "projectName": "example",
+    "nacosServer": "127.0.0.1:8848"
+}
+
+export async function setupConf() {
+    GlobalConfig = await new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName).load(GlobalEnv);
+}
+
 
 interface ConfigLoader {
     /**

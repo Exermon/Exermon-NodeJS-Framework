@@ -8,6 +8,7 @@ import {getFiles} from "../utils/FileUtils";
 import 'reflect-metadata'
 import {ServerConfig} from "../config/ConfigManager";
 import {managerContext} from "./ManagerContext";
+import {setupConf} from "../config/ConfigLoader";
 import {sequelizeMgr} from "../modules/sequelize/SequelizeManager";
 
 export function app() {
@@ -34,6 +35,7 @@ export class App {
 	 * 启动
 	 */
 	public async start() {
+		await setupConf();
 		await managerContext().start();
 	}
 	public async ready() {
