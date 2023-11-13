@@ -1,4 +1,4 @@
-import {BaseInterface, body, get, post, route} from "../http/InterfaceManager";
+import {BaseInterface, body, custom, get, post, route} from "../http/InterfaceManager";
 import {User} from "./models/User";
 import {BaseError} from "../http/utils/ResponseUtils";
 import {UniqueConstraintError} from "sequelize";
@@ -10,9 +10,26 @@ import {auth, authMgr, Payload} from "../auth/AuthManager";
 
 @route("/user")
 export class UserInterface extends BaseInterface {
+
+    @auth()
+    @post("/update")
+    async updateUser(
+        @body("user") user: User,
+        @custom("auth") payload: Payload) {
+        await User.update({
+            email: user.email,
+            card: user.card,
+            userName: user.userName,
+            region: user.region,
+            level: user.level,
+            addresses: user.addresses,
+        }, {where: {phone: payload.phone}});
+
+    }
+
     @auth()
     @get("/me")
-    async getMyProfile(payload: Payload) {
+    async getMyProfile(@custom("auth") payload: Payload) {
         return {
             user: await User.findOne({where: {phone: payload.phone}})
         }
