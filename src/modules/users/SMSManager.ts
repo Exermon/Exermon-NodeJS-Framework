@@ -82,6 +82,10 @@ export class SMSManager extends BaseManager {
 
 
     async remoteSendCode(code: string, phone: string) {
+        // 确保phone以+86开头
+        if (!phone.startsWith("+86")) {
+            phone = "+86" + phone;
+        }
         console.log(`[Send Code] phone: ${phone}, code: ${code}`)
         const params = {
             /* 短信应用ID: 短信SmsSdkAppId在 [短信控制台] 添加应用后生成的实际SmsSdkAppId，示例如1400006666 */

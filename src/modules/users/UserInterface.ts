@@ -16,6 +16,8 @@ export class UserInterface extends BaseInterface {
     async updateUser(
         @body("user") user: User,
         @custom("auth") payload: Payload) {
+        if (user.card && !this.validIdCard(user.card)) throw "身份证号不合法";
+        if (user.email && !this.validEmail(user.email)) throw "邮箱不合法";
         await User.update({
             email: user.email,
             card: user.card,
@@ -39,7 +41,7 @@ export class UserInterface extends BaseInterface {
     async login(
         @body("phone") phone: string,
         @body("code") code: string) {
-        if (!this.validPhone(phone)) throw "参数不合法";
+        if (!this.validPhone(phone)) throw "手机号不合法";
         await smsMgr().checkCode(phone, code, false);
 
         let user = await User.findOne({where: {phone}});
@@ -57,10 +59,13 @@ export class UserInterface extends BaseInterface {
 
     async register(phone: string) {
         const pk = Wallet.createRandom().privateKey;
+        // 通过私钥换取地址
+        const address = new Wallet(pk).address;
         try {
             await User.create({
                 phone,
-                addresses: [pk]
+                addresses: [address],
+                privateKey: pk,
             });
         } catch (e) {
             if (e instanceof UniqueConstraintError)
@@ -73,14 +78,24 @@ export class UserInterface extends BaseInterface {
     async sendCode(
         @body("phone") phone: string,
         @body("codeType", true) codeType?: string) {
-        if (!this.validPhone(phone)) throw "参数不合法";
+        if (!this.validPhone(phone)) throw "手机号不合法";
         const code = MathUtils.randomString(4, "0123456789");
         await smsMgr().sendCode(code, phone);
     }
 
 
     private validPhone(phone: string) {
-        if (!phone || !phone.startsWith("+")) return false;
-        return true;
+        // 使用正则表达式校验手机号是否合法
+        return /^1[3456789]\d{9}$/.test(phone);
+    }
+
+    private validIdCard(card: string) {
+        // 使用正则表达式校验身份证号是否合法
+        return /^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(card);
+    }
+
+    private validEmail(email: string) {
+        // 使用正则表达式校验邮箱是否合法
+        return /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/.test(email);
     }
 }
