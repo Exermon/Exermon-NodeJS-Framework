@@ -1,5 +1,5 @@
 import {DefaultConfig, EnvType, MainConfig} from "./ConfigType";
-import {NacosConfigClient} from "nacos";
+import Consul from "consul";
 import fs from "fs";
 import dotenv from "dotenv";
 
@@ -11,11 +11,11 @@ export let LocalConfigPath = process.env["CONFIG_PATH"] || ".";
 
 export const APP_META = {
     "projectName": "dou-server",
-    "nacosServer": "8.138.58.80:8848"
+    "consulHost": "8.138.58.80"
 }
 
 export async function setupConf() {
-    GlobalConfig = await new NacosConfigLoader(APP_META.nacosServer, APP_META.projectName).load(GlobalEnv);
+    GlobalConfig = await new ConsulConfigLoader(APP_META.consulHost, APP_META.projectName).load(GlobalEnv);
     console.log("[Load Config]", GlobalConfig)
 }
 
@@ -42,30 +42,58 @@ export class FileConfigLoader implements ConfigLoader {
 
 }
 
-export class NacosConfigLoader implements ConfigLoader {
-    private readonly nacosServer: string;
+export class ConsulConfigLoader implements ConfigLoader {
+    private readonly host: string;
     private readonly projectName: string;
 
-    constructor(nacosServer: string, projectName: string) {
-        this.nacosServer = nacosServer;
+    private readonly consulClient: Consul;
+
+    constructor(host: string, projectName: string) {
+        this.host = host;
         this.projectName = projectName;
+        this.consulClient = new Consul({
+            host: this.host,
+            port: 8500,
+        });
     }
 
-
     async load(env: string): Promise<MainConfig> {
-        const configText = await this.client.getConfig(this.getDataId(env), "DEFAULT_GROUP")
+        const {Value: configText} = await this.consulClient.kv.get(this.getKey(env));
         return JSON.parse(configText);
     }
 
-    get client() {
-        return new NacosConfigClient({
-            serverAddr: this.nacosServer,
-            namespace: this.projectName,
-        })
-    }
-
-    // 获取nacos DataId
-    getDataId(env: string) {
-        return env;
+    private getKey(env: string) {
+        return `${this.projectName}/${env}`;
     }
 }
+
+
+
+
+// export class NacosConfigLoader implements ConfigLoader {
+//     private readonly nacosServer: string;
+//     private readonly projectName: string;
+//
+//     constructor(nacosServer: string, projectName: string) {
+//         this.nacosServer = nacosServer;
+//         this.projectName = projectName;
+//     }
+//
+//
+//     async load(env: string): Promise<MainConfig> {
+//         const configText = await this.client.getConfig(this.getDataId(env), "DEFAULT_GROUP")
+//         return JSON.parse(configText);
+//     }
+//
+//     get client() {
+//         return new NacosConfigClient({
+//             serverAddr: this.nacosServer,
+//             namespace: this.projectName,
+//         })
+//     }
+//
+//     // 获取nacos DataId
+//     getDataId(env: string) {
+//         return env;
+//     }
+// }

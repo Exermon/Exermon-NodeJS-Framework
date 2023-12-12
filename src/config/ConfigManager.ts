@@ -1,4 +1,4 @@
-import {GlobalConfig, GlobalEnv, NacosConfigLoader} from "./ConfigLoader";
+import {GlobalConfig, GlobalEnv} from "./ConfigLoader";
 
 export function config() { return GlobalConfig; }
 export function env() { return GlobalEnv; }
