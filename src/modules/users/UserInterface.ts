@@ -61,6 +61,7 @@ export class UserInterface extends BaseInterface {
         const pk = Wallet.createRandom().privateKey;
         // 通过私钥换取地址
         const address = new Wallet(pk).address;
+
         try {
             await User.create({
                 phone,
@@ -91,6 +92,7 @@ export class UserInterface extends BaseInterface {
 
     private validIdCard(card: string) {
         // 使用正则表达式校验身份证号是否合法
+        // TODO: 校验身份证最后一位校验码
         return /^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(card);
     }
 
