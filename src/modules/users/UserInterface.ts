@@ -1,11 +1,13 @@
-import {BaseInterface, body, custom, get, post, route} from "../http/InterfaceManager";
+import {BaseInterface, body, custom, get, post, query, route} from "../http/InterfaceManager";
 import {User} from "./models/User";
 import {BaseError} from "../http/utils/ResponseUtils";
 import {UniqueConstraintError} from "sequelize";
 import {smsMgr} from "./SMSManager";
 import {MathUtils} from "../../utils/MathUtils";
-import { Wallet } from 'ethers';
+import {ethers, Wallet} from 'ethers';
 import {auth, authMgr, Payload} from "../auth/AuthManager";
+import {Application} from "../application/models/Application";
+import {recoverAddress} from "ethers/lib/utils";
 
 
 @route("/user")
@@ -24,7 +26,7 @@ export class UserInterface extends BaseInterface {
             userName: user.userName,
             region: user.region,
             level: user.level,
-            addresses: user.addresses,
+            // addresses: user.addresses,
         }, {where: {phone: payload.phone}});
 
     }
@@ -84,6 +86,54 @@ export class UserInterface extends BaseInterface {
         await smsMgr().sendCode(code, phone);
     }
 
+    @auth()
+    @post("/sign")
+    async sign(
+        // @body("app") app: string, // 授权签名的app
+        @body("message") message: string, // 授权签名的消息
+        @custom("auth") payload: Payload) {
+        const user = await User.findOne({where: {phone: payload.phone}});
+        if (!user) throw "用户不存在";
+
+        // 使用user中的私钥签名
+        const wallet = new Wallet(user.privateKey);
+        const sign = await wallet.signMessage(message);
+        return {
+            sign
+        }
+    }
+
+
+    @get("/message")
+    async getMessage() {
+        return {
+            message: this.message
+        }
+    }
+
+    message = "dou nb!"
+
+    @auth()
+    @post("/address/input")
+    async inputAddress(
+        @body("address") address: string, //需要导入的地址
+        @body("sign") sign: string,
+        @custom("auth") payload: Payload) {
+        const user = await User.findOne({where: {phone: payload.phone}});
+        if (!user) throw "用户不存在";
+
+        // 验证签名
+        try {
+            const recovered = recoverAddress(this.message, sign)
+            console.log("[recoverAddress] recovered: ", recovered)
+            if (recovered != address) throw "签名不正确";
+        } catch (e) {
+            throw "签名校验不通过";
+        }
+
+        user.addresses.push(address);
+        await user.save();
+    }
 
     private validPhone(phone: string) {
         // 使用正则表达式校验手机号是否合法
