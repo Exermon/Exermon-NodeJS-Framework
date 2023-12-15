@@ -129,9 +129,8 @@ export class UserInterface extends BaseInterface {
         // } catch (e) {
         //     throw "签名校验不通过";
         // }
-
-        user.addresses.push(address);
-        await user.save();
+        const addresses = [...user.addresses, address];
+        await User.update({addresses: addresses}, {where: {phone: payload.phone}});
     }
 
     private validPhone(phone: string) {
