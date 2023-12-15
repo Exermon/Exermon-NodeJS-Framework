@@ -7,7 +7,7 @@ import {MathUtils} from "../../utils/MathUtils";
 import {ethers, Wallet} from 'ethers';
 import {auth, authMgr, Payload} from "../auth/AuthManager";
 import {Application} from "../application/models/Application";
-import {hexlify, recoverAddress, toUtf8Bytes} from "ethers/lib/utils";
+import {hexlify, recoverAddress, toUtf8Bytes, verifyMessage} from "ethers/lib/utils";
 
 
 @route("/user")
@@ -121,14 +121,14 @@ export class UserInterface extends BaseInterface {
         const user = await User.findOne({where: {phone: payload.phone}});
         if (!user) throw "用户不存在";
 
-        // // 验证签名
-        // try {
-        //     const recovered = recoverAddress(hexlify(toUtf8Bytes(this.message)), sign)
-        //     console.log("[recoverAddress] recovered: ", recovered)
-        //     if (!user.addresses.includes(recovered)) throw "签名不正确";
-        // } catch (e) {
-        //     throw "签名校验不通过";
-        // }
+        // 验证签名
+        try {
+            const recovered = verifyMessage(this.message, sign)
+            console.log("[recoverAddress] recovered: ", recovered)
+            if (!user.addresses.includes(recovered)) throw "签名不正确";
+        } catch (e) {
+            throw "签名校验不通过";
+        }
         const addresses = [...user.addresses, address];
         await User.update({addresses: addresses}, {where: {phone: payload.phone}});
     }
