@@ -7,7 +7,9 @@
     "compile": "tsc",
     "node": "tsc & node ./dist/index.js",
     "compile-scripts": "tsc -p script-tsconfig.json",
-    "sync-sequelize": "npm run compile-scripts & node ./dist/scripts/src/scripts/SyncSequelize.js",
+    "sync-sequelize": "npm run compile-scripts & node ./dist/scripts/scripts/SyncSequelize.js",
+    "test-ethers-js": "npm run compile-scripts & node ./dist/scripts/scripts/TestEthersJs.js",
+
     "build-test": "./scripts/build-test.sh",
     "run-test": "./scripts/build-test.sh & ./scripts/run-test.sh",
     "deploy-test": "./scripts/build-test.sh & ./scripts/deploy-test.sh",
