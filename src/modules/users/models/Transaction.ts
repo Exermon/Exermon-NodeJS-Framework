@@ -51,4 +51,10 @@ export class Transaction extends BaseModel {
 
     @Column(DataType.INTEGER)
     state: TransactionState;
+
+    toJSON<T extends any>(): T {
+        const res = super.toJSON();
+        res.fee = BigNumber.from(res.gasLimit).mul(BigNumber.from(res.gasPrice)).toString();
+        return res;
+    }
 }

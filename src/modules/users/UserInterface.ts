@@ -62,9 +62,9 @@ export class UserInterface extends BaseInterface {
     const addresses = user.addresses, txs = {}
 
     for (let address of addresses)
-      txs[address] = await Transaction.findAll({
+      txs[address] = (await Transaction.findAll({
         where: {[Op.or]: [{from: address}, {to: address}]},
-      })
+      })).map(tx => tx.toJSON())
 
     return { txs }
   }
