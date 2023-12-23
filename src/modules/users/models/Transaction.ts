@@ -18,7 +18,7 @@ export enum TransactionState {
 export class Transaction extends BaseModel {
 
     @PrimaryKey
-    @Column(DataType.STRING(255))
+    @Column(DataType.STRING(128))
     txHash!: string;
 
     @Column(DataType.INTEGER)
@@ -30,9 +30,9 @@ export class Transaction extends BaseModel {
     @DateTimeColumn
     blockTime: number
 
-    @Column(DataType.STRING(255))
+    @Column(DataType.STRING(128))
     from: string
-    @Column(DataType.STRING(255))
+    @Column(DataType.STRING(128))
     to: string
 
     @Column(DataType.INTEGER)

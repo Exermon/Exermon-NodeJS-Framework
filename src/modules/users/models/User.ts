@@ -2,7 +2,6 @@ import {BaseModel, JSONColumn} from "../../sequelize/BaseModel";
 import {model} from "../../sequelize/SequelizeManager";
 import {AllowNull, AutoIncrement, Column, DataType, PrimaryKey, Table, Unique} from "sequelize-typescript";
 
-
 export enum UserLevel {
     Normal = 0, // 普通用户
     Dev = 1, //开发者
@@ -22,7 +21,7 @@ export class User extends BaseModel {
     id!: string;
 
     @Unique
-    @Column(DataType.STRING(255))
+    @Column(DataType.STRING(32))
     phone: string;
 
     @Column(DataType.STRING(255))
