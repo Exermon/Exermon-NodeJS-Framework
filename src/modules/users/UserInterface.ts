@@ -78,7 +78,7 @@ export class UserInterface extends BaseInterface {
 
     let user = await User.findOne({where: {phone}});
     let registered = true;
-    if (!user) { //注册
+    if (!user) { // 注册
       registered = false;
       await this.register(phone);
     }
