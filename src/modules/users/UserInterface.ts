@@ -6,8 +6,6 @@ import {smsMgr} from "./SMSManager";
 import {MathUtils} from "../../utils/MathUtils";
 import {ethers, Wallet} from 'ethers';
 import {auth, authMgr, Payload} from "../auth/AuthManager";
-import {Application} from "../application/models/Application";
-import {recoverAddress} from "ethers/lib/utils";
 import {getProvider} from "../dou/constants";
 import {Transaction} from "./models/Transaction";
 
@@ -154,15 +152,16 @@ export class UserInterface extends BaseInterface {
 
     // 验证签名
     try {
-      const recovered = recoverAddress(this.message, sign)
-      console.log("[recoverAddress] recovered: ", recovered)
+      // const bytes = ethers.utils.toUtf8Bytes(this.message);
+      const recovered = ethers.utils.verifyMessage(this.message, sign)
+      console.log("[verifyMessage] verifyMessage: ", recovered)
       if (recovered != address) throw "签名不正确";
     } catch (e) {
+      console.log("[verifyMessage] error", e)
       throw "签名校验不通过";
     }
-
-    user.addresses.push(address);
-    await user.save();
+    user.addresses = user.addresses.concat(address)
+    return await user.save();
   }
 
   private validPhone(phone: string) {
