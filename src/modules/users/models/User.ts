@@ -40,11 +40,11 @@ export class User extends BaseModel {
     @Column(DataType.SMALLINT)
     level?: UserLevel;
 
-    @Column(DataType.STRING(255))
-    privateKey?: string;
+    // @Column(DataType.STRING(255))
+    // privateKey?: string;
 
-    @JSONColumn
-    addresses?: string[];
+    // @JSONColumn
+    // addresses?: string[];
 
     toJSON() {
         return {
@@ -55,7 +55,7 @@ export class User extends BaseModel {
             userName: this.userName,
             region: this.region,
             level: this.level,
-            addresses: this.addresses,
+            // addresses: this.addresses,
         }
     }
 }

@@ -9,7 +9,9 @@ import {auth, authMgr, Payload} from "../auth/AuthManager";
 import {getProvider} from "../dou/constants";
 import {Transaction} from "./models/Transaction";
 import {Application} from "../application/models/Application";
-import {Sign} from "./models/Sign";
+import {Sign, SignType} from "./models/Sign";
+import {AddressType, UserAddress} from "./models/UserAddress";
+import {snowflake} from "../sequelize/snowflake/Snowflake";
 
 
 @route("/user")
@@ -45,7 +47,10 @@ export class UserInterface extends BaseInterface {
     @get("/balances")
     async getBalances(@custom("auth") payload: Payload) {
         const user = await User.findOne({where: {phone: payload.phone}});
-        const addresses = user.addresses, balances = {}
+        const userAddresses = await UserAddress.findAll({where: {userId: user.id}});
+        if (!userAddresses) throw "用户地址信息异常";
+
+        const addresses = userAddresses.map(v => v.address), balances = {}
 
         const provider = await getProvider("devnet");
 
@@ -59,7 +64,10 @@ export class UserInterface extends BaseInterface {
     @get("/txs")
     async getTransactions(@custom("auth") payload: Payload) {
         const user = await User.findOne({where: {phone: payload.phone}});
-        const addresses = user.addresses, txs = {}
+        const userAddresses = await UserAddress.findAll({where: {userId: user.id}});
+        if (!userAddresses) throw "用户地址信息异常";
+
+        const addresses = userAddresses.map(v => v.address), txs = {}
 
         for (let address of addresses)
             txs[address] = (await Transaction.findAll({
@@ -95,11 +103,15 @@ export class UserInterface extends BaseInterface {
         const address = new Wallet(pk).address;
 
         try {
-            await User.create({
+            const user = await User.create({
                 phone,
-                addresses: [address],
-                privateKey: pk,
             });
+            await UserAddress.create({
+                userId: user.id,
+                address,
+                addressType: AddressType.Inner,
+                privateKey: pk,
+            })
         } catch (e) {
             if (e instanceof UniqueConstraintError)
                 throw new BaseError(400, "手机号已经被注册");
@@ -123,7 +135,7 @@ export class UserInterface extends BaseInterface {
         @body("message") message: string, // 授权签名的消息
         @body("appId") appId: string, // 授权签名的app
         @body("redirectUrl") redirectUrl: string,
-        @body("signType") signType: number,
+        @body("signType") signType: SignType,
         @custom("auth") payload: Payload) {
         const user = await User.findOne({where: {phone: payload.phone}});
         if (!user) throw "用户不存在";
@@ -131,8 +143,9 @@ export class UserInterface extends BaseInterface {
         const app = await Application.findByPk(appId);
         if (!app) throw "应用不存在";
 
+        const ud = await UserAddress.findOne({where: {userId: user.id, addressType: AddressType.Inner}})
         // 使用user中的私钥签名
-        const wallet = new Wallet(user.privateKey);
+        const wallet = new Wallet(ud.privateKey);
         const sign = await wallet.signMessage(message);
 
         await Sign.create({
@@ -142,9 +155,13 @@ export class UserInterface extends BaseInterface {
             signType,
             redirectUrl,
             creator: payload.phone,
-        })
+        });
+        if (signType == SignType.Reject) return;// 拒绝签名
+
         return {
-            sign
+            sign,
+            message, // 授权签名的消息
+            address: ud.address
         }
     }
 
@@ -177,8 +194,17 @@ export class UserInterface extends BaseInterface {
             console.log("[verifyMessage] error", e)
             throw "签名校验不通过";
         }
-        user.addresses = user.addresses.concat(address)
-        return await user.save();
+
+        const sign_ = await Sign.findOne({where: {sign}});
+        const ud = await UserAddress.findOne({where: {address}}); // 检查地址是否已经绑定
+        if (ud) throw `地址${address}已经绑定`;
+
+        await UserAddress.create({
+            userId: user.id,
+            address,
+            addressType: AddressType.Outer,
+            signId: sign_.id,
+        })
     }
 
     private validPhone(phone: string) {
