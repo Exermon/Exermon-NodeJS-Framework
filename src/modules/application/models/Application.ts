@@ -10,10 +10,8 @@ import {AllowNull, AutoIncrement, Column, DataType, PrimaryKey, Table} from "seq
 })
 export class Application extends BaseModel {
     @PrimaryKey
-    @AutoIncrement
     @Column(DataType.BIGINT)
     id!: string;
-
 
     @AllowNull(false)
     @Column(DataType.STRING(255))
@@ -27,4 +25,11 @@ export class Application extends BaseModel {
 
     @Column(DataType.STRING(255))
     logo: string;
+
+    @Column(DataType.STRING(255))
+    defaultRedirectUrl: string;
+
+    @Column(DataType.STRING(1023))
+    developers: string; // 开发者列表，以英文分号分割
+
 }
