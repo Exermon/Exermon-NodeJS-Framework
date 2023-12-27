@@ -3,5 +3,9 @@
 console.log("Start App Here!");
 
 import {app} from "./app/App";
-app().start().then(() => app().ready());
+import {sequelizeMgr} from "./modules/sequelize/SequelizeManager";
+
+app().start()
+  // .then(() => sequelizeMgr().sync())
+  .then(() => app().ready());
 
